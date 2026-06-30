@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienvenido al Sistema Hotelero</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+</head>
+<body class="bg-gradient-to-br from-indigo-900 via-slate-900 to-indigo-950 text-white min-h-screen flex flex-col justify-between p-6">
+
+    <!-- Encabezado sutil -->
+    <header class="max-w-7xl mx-auto w-full flex justify-between items-center opacity-80">
+        <div class="flex items-center space-x-2">
+            <span class="text-2xl">🏨</span>
+            <span class="font-bold tracking-wider text-sm uppercase">Control Operativo</span>
+        </div>
+        <p id="reloj" class="font-mono text-sm tracking-widest bg-white/10 px-3 py-1 rounded-full"></p>
+    </header>
+
+    <!-- Contenido Central Dinámico -->
+    <main class="max-w-md w-full mx-auto text-center space-y-8 my-auto">
+        <div class="space-y-4">
+            <!-- Icono dinámico que cambia por JavaScript -->
+            <span id="saludo-icono" class="text-6xl block animate-bounce duration-1000">☀️</span>
+            
+            <!-- Texto de saludo dinámico -->
+            <h1 id="saludo-texto" class="text-4xl font-black tracking-tight sm:text-5xl drop-shadow-md">
+                ¡Hola, excelente día!
+            </h1>
+            
+            <p class="text-slate-400 text-sm max-w-xs mx-auto">
+                Bienvenido al portal de recepción. Asegúrate de tener tu efectivo listo para el corte de caja.
+            </p>
+        </div>
+
+        <!-- Botón de Acción Principal -->
+        <div class="pt-4">
+            <button onclick="irAlSistema()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-lg p-4 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-indigo-500/30 flex items-center justify-center space-x-3">
+                <span>🚀 Iniciar Turno / Acceder</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+            </button>
+        </div>
+    </main>
+
+    <!-- Pie de página -->
+    <footer class="text-center text-xs text-slate-500 tracking-wide">
+        Hoteles © 2026 • Sistema de Gestión de Caja Blindada
+    </footer>
+
+    <!-- Lógica del Saludo Inteligente -->
+    <script>
+        function actualizarSaludo() {
+            const ahora = new Date();
+            const hora = ahora.getHours();
+            
+            // Formatear el reloj digital del encabezado
+            const opciones = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+            document.getElementById('reloj').innerText = ahora.toLocaleTimeString('es-MX', opciones);
+
+            const texto = document.getElementById('saludo-texto');
+            const icono = document.getElementById('saludo-icono');
+
+            // Determinar saludo según la hora del dispositivo
+            if (hora >= 6 && hora < 12) {
+                texto.innerText = "¡Buenos días! ☀️";
+                icono.innerText = "☀️";
+            } else if (hora >= 12 && hora < 19) {
+                texto.innerText = "¡Buenas tardes! 🌤️";
+                icono.innerText = "🌤️";
+            } else {
+                texto.innerText = "¡Buenas noches! 🌙";
+                icono.innerText = "🌙";
+            }
+        }
+
+        function irAlSistema() {
+            // Te manda directo al segundo archivo en la misma carpeta
+            window.location.href = 'inicio.html';
+        }
+
+        // Ejecutar al cargar y actualizar el reloj cada segundo
+        actualizarSaludo();
+        setInterval(actualizarSaludo, 1000);
+    </script>
+</body>
+</html>
