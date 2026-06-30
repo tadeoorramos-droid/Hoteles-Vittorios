@@ -1,1 +1,498 @@
-hola
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Control Hotelero - Recepción</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+</head>
+<body class="bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 min-h-screen transition-colors duration-200 flex flex-col justify-between">
+
+    <div id="pantalla-login" class="flex-grow flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 max-w-sm w-full space-y-6">
+            <div class="text-center space-y-2">
+                <span class="text-4xl">🔑</span>
+                <h2 class="text-2xl font-black tracking-tight text-indigo-600 dark:text-indigo-400">Acceso Autorizado</h2>
+                <p class="text-xs text-gray-400">Ingresa tus datos para desbloquear la caja operativa.</p>
+            </div>
+
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider mb-1">Nombre del Empleado</label>
+                    <input type="text" id="login-usuario" required placeholder="Ej. Carlos López" class="w-full p-3 rounded-xl border dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider mb-1">Turno</label>
+                        <select id="login-turno" class="w-full p-3 rounded-xl border dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <option value="Día">☀️ Turno Día</option>
+                            <option value="Noche">🌙 Turno Noche</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider mb-1">Contraseña</label>
+                        <input type="password" id="login-password" required placeholder="Contraseña" class="w-full p-3 rounded-xl border text-center dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold p-3 rounded-xl transition-colors shadow-md shadow-indigo-200 dark:shadow-none">
+                    Entrar al Panel
+                </button>
+            </form>
+            
+            <div class="flex justify-between items-center pt-3 border-t dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400">
+                <button id="theme-toggle-login" class="hover:underline">🌓 Cambiar Color</button>
+                <button onclick="abrirModalPass()" class="text-indigo-500 hover:underline font-medium">⚙️ Cambiar Contraseña</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="pantalla-dashboard" class="hidden flex-grow flex flex-col justify-between">
+        <nav class="bg-white dark:bg-gray-800 shadow p-4 sticky top-0 z-10">
+            <div class="max-w-7xl mx-auto flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <span class="text-xl">🏨</span>
+                    <h1 class="text-lg font-bold tracking-tight text-indigo-600 dark:text-indigo-400">Panel de Control Activo</h1>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <span id="usuario-firmado" class="text-xs font-medium bg-gray-100 dark:bg-gray-700 px-3 py-1.5 rounded-full border dark:border-gray-600">👤 Empleado: -</span>
+                    <button id="theme-toggle-dash" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-sm">🌓</button>
+                    <button onclick="cerrarSesion()" class="bg-red-50 hover:bg-red-100 dark:bg-red-950/40 dark:hover:bg-red-900/40 text-red-600 dark:text-red-400 font-semibold text-xs px-3 py-2 rounded-lg transition-colors border border-red-200 dark:border-red-900">
+                        Salir / Bloquear
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <main class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6 w-full flex-grow">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                    <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">Fondo Inicial (Cambio)</p>
+                    <p id="total-fondo" class="text-2xl font-bold text-gray-800 dark:text-white">$0.00</p>
+                </div>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                    <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">Ingresos (Rentas + Tienda)</p>
+                    <p id="total-ventas" class="text-2xl font-bold text-green-600 dark:text-green-400">$0.00</p>
+                </div>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                    <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">Efectivo Esperado en Caja</p>
+                    <p id="total-caja" class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">$0.00</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-1 space-y-6">
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                        <h2 class="text-lg font-semibold mb-4 border-b pb-2 dark:border-gray-700">Registrar Entrada / Fondo</h2>
+                        <form id="registro-form" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Tipo de Registro</label>
+                                <select id="tipo" onchange="evaluarTipoMovimiento()" class="w-full p-2.5 rounded-lg border dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 outline-none">
+                                    <option value="Renta">🔑 Renta de Habitación</option>
+                                    <option value="Fondo">💰 Cargar Cambio Inicial / Fondo</option>
+                                </select>
+                            </div>
+
+                            <div id="div-habitacion">
+                                <label class="block text-sm font-medium mb-1">No. Habitación</label>
+                                <input type="text" id="habitacion" class="w-full p-2.5 rounded-lg border dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 outline-none">
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Monto Cobrado</label>
+                                    <input type="number" id="monto" min="0" required oninput="calcularCambioRenta()" class="w-full p-2.5 rounded-lg border dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 outline-none">
+                                </div>
+                                <div id="div-pago-con">
+                                    <label class="block text-sm font-medium mb-1">Pagó con:</label>
+                                    <input type="number" id="pago-con" min="0" oninput="calcularCambioRenta()" placeholder="Ej. 500" class="w-full p-2.5 rounded-lg border dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 outline-none">
+                                </div>
+                            </div>
+
+                            <div id="resultado-cambio-renta" class="hidden p-3 bg-indigo-50 dark:bg-indigo-950/40 rounded-lg border border-indigo-100 dark:border-indigo-900 text-center">
+                                <p class="text-xs text-indigo-500 dark:text-indigo-400 font-medium uppercase">Cambio a regresar</p>
+                                <p id="texto-cambio-renta" class="text-2xl font-black text-indigo-700 dark:text-indigo-300">$0.00</p>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Notas / Detalles</label>
+                                <textarea id="notas" placeholder="Observaciones..." class="w-full p-2.5 rounded-lg border dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 outline-none h-14"></textarea>
+                            </div>
+
+                            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium p-3 rounded-lg transition-colors">
+                                Guardar Registro
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                        <h2 class="text-lg font-semibold mb-3 border-b pb-2 dark:border-gray-700">🛒 Tiendita / Inventario</h2>
+                        <div id="lista-inventario" class="space-y-3"></div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col">
+                    <div class="flex justify-between items-center mb-4 border-b pb-2 dark:border-gray-700">
+                        <h2 class="text-lg font-semibold">Historial de Operaciones Diarias</h2>
+                        <button onclick="limpiarBitacora()" class="text-xs text-red-500 hover:underline">Reiniciar Caja del Día</button>
+                    </div>
+                    
+                    <div class="overflow-x-auto flex-grow">
+                        <table class="w-full text-left text-sm text-gray-500 dark:text-gray-400">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-gray-700 dark:text-gray-300">
+                                <tr>
+                                    <th class="px-4 py-3">Hora/Turno</th>
+                                    <th class="px-4 py-3">Empleado</th>
+                                    <th class="px-4 py-3">Concepto</th>
+                                    <th class="px-4 py-3">Monto</th>
+                                    <th class="px-4 py-3">Flujo de Efectivo</th>
+                                    <th class="px-4 py-3">Notas</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-registros" class="divide-y dark:divide-gray-700"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="modal-cambio-pass" class="fixed inset-0 bg-black/60 hidden items-center justify-center p-4 z-50">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-sm w-full shadow-2xl border dark:border-gray-700 space-y-4">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">Actualizar Contraseña</h3>
+                    <p class="text-xs text-gray-400">Requiere el código maestro del administrador.</p>
+                </div>
+                <button onclick="cerrarModalPass()" class="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
+            </div>
+            
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider mb-1 text-slate-500">Código de Autorización</label>
+                    <input type="password" id="cambio-codigo-maestro" placeholder="Mete los 10 dígitos" class="w-full p-2.5 rounded-xl border dark:bg-gray-700 dark:border-gray-600 text-center font-mono focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider mb-1 text-slate-500">Nueva Contraseña de Acceso</label>
+                    <input type="text" id="cambio-nueva-password" placeholder="Ej. NuevaContra2026" class="w-full p-2.5 rounded-xl border dark:bg-gray-700 dark:border-gray-600 text-center font-semibold focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+            </div>
+
+            <div class="flex space-x-2 pt-2">
+                <button onclick="cerrarModalPass()" class="w-1/2 bg-gray-200 dark:bg-gray-700 p-2.5 rounded-xl font-medium text-sm">Cancelar</button>
+                <button onclick="ejecutarCambioPassword()" class="w-1/2 bg-indigo-600 hover:bg-indigo-700 text-white p-2.5 rounded-xl font-bold text-sm transition-colors">Guardar Nueva</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-tienda" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50">
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-sm w-full shadow-xl border dark:border-gray-700 space-y-4">
+            <div class="flex justify-between items-start">
+                <h3 id="modal-titulo" class="text-lg font-bold text-gray-900 dark:text-white">Confirmar Venta</h3>
+                <button onclick="cerrarModal()" class="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
+            </div>
+            <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg text-center">
+                <p class="text-xs text-gray-400 font-medium uppercase">Total a Cobrar</p>
+                <p id="modal-precio-texto" class="text-3xl font-black text-emerald-600 dark:text-emerald-400">$0.00</p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium mb-1">¿Con cuánto pagó?</label>
+                <input type="number" id="modal-pago-con" placeholder="Ej. 100" oninput="calcularCambioTienda()" class="w-full p-2.5 rounded-lg border dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-emerald-500 outline-none font-bold text-lg">
+            </div>
+            <div id="modal-resultado-cambio" class="p-3 bg-emerald-50 dark:bg-emerald-950/40 rounded-lg border border-emerald-100 dark:border-indigo-900 text-center hidden">
+                <p class="text-xs text-emerald-600 dark:text-emerald-400 font-medium uppercase">Cambio a regresar</p>
+                <p id="modal-cambio-texto" class="text-2xl font-black text-emerald-700 dark:text-emerald-300">$0.00</p>
+            </div>
+            <div class="flex space-x-2 pt-2">
+                <button onclick="cerrarModal()" class="w-1/2 bg-gray-200 dark:bg-gray-700 p-2.5 rounded-lg font-medium text-sm">Cancelar</button>
+                <button id="btn-confirmar-venta" class="w-1/2 bg-emerald-600 hover:bg-emerald-700 text-white p-2.5 rounded-lg font-medium text-sm transition-colors">Cobrar</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="p-3 text-center text-xs text-gray-400 border-t bg-white dark:bg-gray-800 dark:border-gray-700">
+        Sistema Control Seguro • Hoteles 2026
+    </footer>
+
+    <script>
+        // --- LLAVE MAESTRA OPERATIVA ---
+        const CODIGO_MAESTRO = "0586781017";
+
+        // Inicializar la contraseña por defecto si no existe en la memoria local
+        if (!localStorage.getItem('hotel_password_actual')) {
+            localStorage.setItem('hotel_password_actual', 'Mexico');
+        }
+
+        let usuarioActivo = null, turnoActivo = null;
+
+        let registros = JSON.parse(localStorage.getItem('hotel_registros')) || [];
+        let inventario = JSON.parse(localStorage.getItem('hotel_inventario')) || [
+            { id: 1, nombre: "Agua Embotellada", stock: 20, precio: 15.00 },
+            { id: 2, nombre: "Refresco Coca-Cola", stock: 15, precio: 22.00 },
+            { id: 3, nombre: "Papas / Sabritas", stock: 12, precio: 20.00 }
+        ];
+        let productoSeleccionadoId = null;
+
+        document.getElementById('theme-toggle-login').addEventListener('click', () => document.documentElement.classList.toggle('dark'));
+        document.getElementById('theme-toggle-dash').addEventListener('click', () => document.documentElement.classList.toggle('dark'));
+
+        // VALIDACIÓN DEL ACCESO AL SISTEMA
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const usuarioInput = document.getElementById('login-usuario').value.trim();
+            const turnoInput = document.getElementById('login-turno').value;
+            const passInput = document.getElementById('login-password').value;
+
+            // Obtener contraseña vigente de la memoria
+            const passwordVigente = localStorage.getItem('hotel_password_actual');
+
+            if (passInput === passwordVigente) {
+                usuarioActivo = usuarioInput;
+                turnoActivo = turnoInput;
+                document.getElementById('usuario-firmado').innerText = `👤 Empleado: ${usuarioActivo} (${turnoActivo})`;
+                document.getElementById('pantalla-login').classList.add('hidden');
+                document.getElementById('pantalla-dashboard').classList.remove('hidden');
+                this.reset();
+                actualizarInterfaz();
+                evaluarTipoMovimiento();
+            } else {
+                alert("❌ Contraseña incorrecta. Si no pones la contraseña válida no puedes acceder al sistema.");
+            }
+        });
+
+        // CONTROL DEL MODAL DE CAMBIO DE CONTRASEÑA
+        function abrirModalPass() {
+            document.getElementById('modal-cambio-pass').classList.remove('hidden');
+            document.getElementById('modal-cambio-pass').classList.add('flex');
+        }
+
+        function cerrarModalPass() {
+            document.getElementById('modal-cambio-pass').classList.add('hidden');
+            document.getElementById('modal-cambio-pass').classList.remove('flex');
+            document.getElementById('cambio-codigo-maestro').value = '';
+            document.getElementById('cambio-nueva-password').value = '';
+        }
+
+        function ejecutarCambioPassword() {
+            const codigoInput = document.getElementById('cambio-codigo-maestro').value.trim();
+            const nuevaPassword = document.getElementById('cambio-nueva-password').value.trim();
+
+            if (codigoInput !== CODIGO_MAESTRO) {
+                alert("❌ Código de Autorización incorrecto. No tienes permiso para alterar las llaves.");
+                return;
+            }
+
+            if (nuevaPassword.length < 3) {
+                alert("⚠️ Por seguridad, escribe una contraseña válida de al menos 3 letras.");
+                return;
+            }
+
+            // Guardar nueva contraseña en localStorage
+            localStorage.setItem('hotel_password_actual', nuevaPassword);
+            alert(`✅ ¡Contraseña cambiada con éxito!\nA partir de ahora se ingresa con: "${nuevaPassword}"`);
+            cerrarModalPass();
+        }
+
+        function cerrarSesion() {
+            usuarioActivo = null; turnoActivo = null;
+            document.getElementById('pantalla-dashboard').classList.add('hidden');
+            document.getElementById('pantalla-login').classList.remove('hidden');
+            window.location.href = 'index.html';
+        }
+
+        function evaluarTipoMovimiento() {
+            const tipo = document.getElementById('tipo').value;
+            document.getElementById('div-habitacion').style.display = tipo === 'Fondo' ? 'none' : 'block';
+            document.getElementById('div-pago-con').style.display = tipo === 'Fondo' ? 'none' : 'block';
+            document.getElementById('habitacion').required = tipo !== 'Fondo';
+            calcularCambioRenta();
+        }
+
+        function calcularCambioRenta() {
+            const tipo = document.getElementById('tipo').value;
+            const monto = parseFloat(document.getElementById('monto').value) || 0;
+            const pagoCon = parseFloat(document.getElementById('pago-con').value) || 0;
+            const divResultado = document.getElementById('resultado-cambio-renta');
+            const textoCambio = document.getElementById('texto-cambio-renta');
+
+            if (tipo === 'Renta' && pagoCon > 0 && monto > 0) {
+                divResultado.classList.remove('hidden');
+                const cambio = pagoCon - monto;
+                if (cambio >= 0) {
+                    textoCambio.innerText = `$${cambio.toFixed(2)}`;
+                    textoCambio.className = "text-2xl font-black text-indigo-700 dark:text-indigo-300";
+                } else {
+                    textoCambio.innerText = "Efectivo insuficiente";
+                    textoCambio.className = "text-sm font-bold text-red-500";
+                }
+            } else {
+                divResultado.classList.add('hidden');
+            }
+        }
+
+        document.getElementById('registro-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const hora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const tipo = document.getElementById('tipo').value;
+            const habitacion = document.getElementById('habitacion').value;
+            const monto = parseFloat(document.getElementById('monto').value);
+            const pagoCon = parseFloat(document.getElementById('pago-con').value) || null;
+
+            let detalleFlujo = "-";
+            if (tipo === 'Renta' && pagoCon && pagoCon >= monto) {
+                detalleFlujo = `Recibió: $${pagoCon.toFixed(2)}<br>Cambio: $${(pagoCon - monto).toFixed(2)}`;
+            }
+
+            const nuevoRegistro = {
+                hora, empleado: usuarioActivo, turno: turnoActivo, tipo, 
+                detalle: tipo === 'Renta' ? `🔑 Habitación ${habitacion}` : '💰 Fondo Inicial', 
+                monto, flujo: detalleFlujo, notas: document.getElementById('notas').value
+            };
+
+            registros.push(nuevoRegistro);
+            localStorage.setItem('hotel_registros', JSON.stringify(registros));
+            
+            document.getElementById('monto').value = '';
+            document.getElementById('pago-con').value = '';
+            document.getElementById('habitacion').value = '';
+            document.getElementById('notas').value = '';
+            
+            actualizarInterfaz();
+            evaluarTipoMovimiento();
+        });
+
+        function abrirModalTienda(id) {
+            const articulo = inventario.find(item => item.id === id);
+            if (articulo.stock <= 0) { alert(`❌ Sin stock.`); return; }
+            productoSeleccionadoId = id;
+            document.getElementById('modal-titulo').innerText = `Venta: ${articulo.nombre}`;
+            document.getElementById('modal-precio-texto').innerText = `$${articulo.precio.toFixed(2)}`;
+            document.getElementById('modal-pago-con').value = '';
+            document.getElementById('modal-resultado-cambio').classList.add('hidden');
+            document.getElementById('btn-confirmar-venta').onclick = ejecutarVentaTienda;
+            document.getElementById('modal-tienda').classList.remove('hidden');
+            document.getElementById('modal-tienda').classList.add('flex');
+        }
+
+        function cerrarModal() {
+            document.getElementById('modal-tienda').classList.add('hidden');
+            document.getElementById('modal-tienda').classList.remove('flex');
+        }
+
+        function calcularCambioTienda() {
+            const articulo = inventario.find(item => item.id === productoSeleccionadoId);
+            const pagoCon = parseFloat(document.getElementById('modal-pago-con').value) || 0;
+            const divResultado = document.getElementById('modal-resultado-cambio');
+            const textoCambio = document.getElementById('modal-cambio-texto');
+
+            if (pagoCon > 0) {
+                divResultado.classList.remove('hidden');
+                const cambio = pagoCon - articulo.precio;
+                if (cambio >= 0) {
+                    textoCambio.innerText = `$${cambio.toFixed(2)}`;
+                    textoCambio.className = "text-2xl font-black text-emerald-700 dark:text-emerald-300";
+                } else {
+                    textoCambio.innerText = "Efectivo insuficiente";
+                    textoCambio.className = "text-sm font-bold text-red-500";
+                }
+            } else { divResultado.classList.add('hidden'); }
+        }
+
+        function ejecutarVentaTienda() {
+            const articulo = inventario.find(item => item.id === productoSeleccionadoId);
+            const pagoCon = parseFloat(document.getElementById('modal-pago-con').value) || 0;
+
+            if (pagoCon > 0 && pagoCon < articulo.precio) { alert("❌ Efectivo menor al precio."); return; }
+
+            articulo.stock -= 1;
+            localStorage.setItem('hotel_inventario', JSON.stringify(inventario));
+
+            const hora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            let detalleFlujo = "-";
+            if (pagoCon && pagoCon >= articulo.precio) {
+                detalleFlujo = `Recibió: $${pagoCon.toFixed(2)}<br>Cambio: $${(pagoCon - articulo.precio).toFixed(2)}`;
+            }
+
+            const nuevoRegistro = {
+                hora, empleado: usuarioActivo, turno: turnoActivo, tipo: 'Tienda',
+                detalle: `🛒 Venta: ${articulo.nombre}`, monto: articulo.precio,
+                flujo: detalleFlujo, notas: "Venta de tiendita"
+            };
+
+            registros.push(nuevoRegistro);
+            localStorage.setItem('hotel_registros', JSON.stringify(registros));
+            cerrarModal();
+            actualizarInterfaz();
+        }
+
+        function surtirArticulo(id) {
+            const cantidad = parseInt(prompt("¿Cuántas piezas vas a añadir?", "5"));
+            if (isNaN(cantidad) || cantidad <= 0) return;
+            const articulo = inventario.find(item => item.id === id);
+            articulo.stock += cantidad;
+            localStorage.setItem('hotel_inventario', JSON.stringify(inventario));
+            actualizarInterfaz();
+        }
+
+        function actualizarInterfaz() {
+            const tbody = document.getElementById('tabla-registros');
+            tbody.innerHTML = '';
+            let fondo = 0, ventas = 0;
+
+            registros.slice().reverse().forEach(reg => {
+                if (reg.tipo === 'Fondo') fondo += reg.monto;
+                if (reg.tipo === 'Renta' || reg.tipo === 'Tienda') ventas += reg.monto;
+
+                const tr = document.createElement('tr');
+                tr.className = 'border-b bg-white dark:bg-gray-800 dark:border-gray-700 text-xs sm:text-sm';
+                let colorMonto = reg.tipo === 'Fondo' ? 'text-blue-600' : (reg.tipo === 'Tienda' ? 'text-orange-500' : 'text-green-600');
+
+                tr.innerHTML = `
+                    <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">${reg.hora} <span class="text-xs text-gray-400">(${reg.turno})</span></td>
+                    <td class="px-4 py-3">${reg.empleado}</td>
+                    <td class="px-4 py-3 font-semibold">${reg.detalle}</td>
+                    <td class="px-4 py-3 font-bold ${colorMonto}">$${reg.monto.toFixed(2)}</td>
+                    <td class="px-4 py-3 text-xs text-gray-600 dark:text-gray-400 font-mono">${reg.flujo}</td>
+                    <td class="px-4 py-3 text-xs italic max-w-xs truncate">${reg.notes || '-'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('total-fondo').innerText = `$${fondo.toFixed(2)}`;
+            document.getElementById('total-ventas').innerText = `$${ventas.toFixed(2)}`;
+            document.getElementById('total-caja').innerText = `$${(fondo + ventas).toFixed(2)}`;
+
+            const divInventario = document.getElementById('lista-inventario');
+            divInventario.innerHTML = '';
+            inventario.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = "flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border dark:border-gray-700";
+                const stockAlerta = item.stock <= 3 ? 'text-red-500 font-bold' : 'text-gray-500 dark:text-gray-300';
+                itemDiv.innerHTML = `
+                    <div>
+                        <p class="font-medium text-sm">${item.nombre}</p>
+                        <p class="text-xs text-gray-400">Precio: $${item.precio.toFixed(2)} | Stock: <span class="${stockAlerta}">${item.stock} pzas</span></p>
+                    </div>
+                    <div class="flex space-x-1.5">
+                        <button onclick="abrirModalTienda(${item.id})" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-2.5 py-1.5 rounded font-medium transition-colors">Vender</button>
+                        <button onclick="surtirArticulo(${item.id})" class="bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-700 dark:text-white text-xs px-1.5 py-1.5 rounded transition-colors">+</button>
+                    </div>
+                `;
+                divInventario.appendChild(itemDiv);
+            });
+        }
+
+        function limpiarBitacora() {
+            if(confirm('¿Seguro que deseas reiniciar el día?')) {
+                registros = []; localStorage.removeItem('hotel_registros'); actualizarInterfaz();
+            }
+        }
+    </script>
+</body>
+</html>
